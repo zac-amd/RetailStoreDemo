@@ -1,0 +1,58 @@
+version: '3.8'
+services:
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - product-db
+      - pricing-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/product_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+
+  pricing-service:
+    build: ./pricing-service
+    container_name: pricing-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pricing-db
+
+  frontend:
+    build: ./frontend
+    container_name: retail-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - product-service
+
+  product-db:
+    image: postgres:15
+    container_name: product-db
+    environment:
+      - POSTGRES_DB=product_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - product_db_data:/var/lib/postgresql/data
+
+  pricing-db:
+    image: postgres:15
+    container_name: pricing-db
+    environment:
+      - POSTGRES_DB=pricing_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - pricing_db_data:/var/lib/postgresql/data
+
+volumes:
+  product_db_data:
+  pricing_db_data:
